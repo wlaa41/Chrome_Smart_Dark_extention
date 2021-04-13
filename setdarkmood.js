@@ -1,3 +1,72 @@
+function updateifActive(){
+    chrome.storage.sync.get("active", ({ active }) => {
+        // changeColor.style.backgroundColor = color;
+        // changeColor.innerHTML=""+active
+        // console.log('hello ################################3')
+        console.log('this is the event')
+        console.log(event);
+        console.log(active)
+        if(active){setPageBackgroundColor()}
+    })
+}
+
+updateifActive()// first start up ....
+
+
+
+function nodeInsertedCallback(event) {
+    console.log(updateNow + '  updating ')
+    if(updateNow ){
+
+    // updateOnHold  = false
+    // console.log('updateOnHold is set to '+updateOnHold)
+    updateifActive()
+    }
+    else{ 
+        // updateOnHold  = true
+        console.log('No update yet')
+    };
+
+
+};
+
+
+// this to stop updating at every DOM update as -addEventListener DOMNodeInserted- fires a lot in the begining
+let updateNow = false  
+time2wait = 3000 // the time start slow then it become faster to be more responsive
+
+// in case the updateNow was false and update happened this will store that to fire the update 
+// let updateOnHold  = true
+
+setTimeout(() => {
+            updateNow = true 
+            nodeInsertedCallback(" * waiting if active ") 
+            // updateOnHold  = false
+            // console.log('updateOnHold is set to '+updateOnHold)
+
+                
+
+}, time2wait);
+
+// setInterval(()=>{
+    
+//     console.log('chnging updateNow to ',!updateNow)
+//     if(updateNow){
+//         if(updateOnHold){
+//             nodeInsertedCallback(" * waiting if active ") 
+//             updateOnHold  = false
+//             console.log('updateOnHold is set to '+updateOnHold)
+//          }
+
+//     }
+//     else{
+
+//     }
+//     updateNow = !updateNow
+// },time2wait)
+
+document.addEventListener('DOMNodeInserted', nodeInsertedCallback);
+
 
 function setPageBackgroundColor() {
 
@@ -25,10 +94,10 @@ function setPageBackgroundColor() {
     
     
 
-    let e = document.getElementsByClassName("smart-bar--smart-bar--yellow--3RXTf")
-    console.log('e which the yollow ')
-    console.log('----')
-    console.log(e)
+    // let e = document.getElementsByClassName("smart-bar--smart-bar--yellow--3RXTf")
+    // console.log('e which the yollow ')
+    // console.log('----')
+    // console.log(e)
     // Dynamic Operator     smart-bar--smart-bar--yellow--3RXTfsmart-bar--smart-bar--32jNQ smart-bar--smart-bar--yellow--3RXTf
     var operator_table = {
         moreThan: function(a, b) { return a > b; },
@@ -37,7 +106,7 @@ function setPageBackgroundColor() {
 
     // the properties to be changed in the dom element
     let properties = [{ name: "background-color", ratio: 2, camelCase: "backgroundColor"  , 
-                            element: null, threshold:430,compare: operator_table.moreThan, missingValue_replace: "rgb(130,120,150)"},
+                            element: null, threshold:450,compare: operator_table.moreThan, missingValue_replace: "rgb(130,120,150)"},
                         { name: "color", ratio: 1, camelCase: "color" , element: null, 
                             threshold:350,compare: operator_table.lessThan, missingValue_replace: "rgba(255,120,150,1)"},
                         { name: "border_color", ratio: 1, camelCase: "borderColor"  ,
@@ -68,8 +137,11 @@ function setPageBackgroundColor() {
 
             // handling missing data
             var rgba = properties[j].element  ?properties[j].element: properties[j].missingValue_replace ; 
-            if(element.classList.contains("smart-bar--smart-bar--yellow--3RXTf") ||  rgba === "rga(255, 231, 153)"){
+            if(element.classList.contains("udlite-badge-bestseller") ||
+              rgba === "rga(255, 231, 153)"){
+
                 console.log('catch it     #############################################3')
+                console.log(element)
             }
             // console.log(rgba,properties[j].name) 
         
@@ -89,18 +161,7 @@ function setPageBackgroundColor() {
                     if(rgba.length<4){
                         rgba = rgba.concat([1]) // changing rgb to rgba
                     }
-                    // else if(rgba[3]<.5){ // increasing the brightness when the transparency is low
-                    //     //this is important as rgba(0.0.0,0) can be consider dark while it is white
-                    //     // because transparency is zero
-                    //     let sum = 0
-                    //         for (let k = 0; k < rgba.length-1 ; k++) {
-                    //         rgba[k] = 255- (rgba[3]* 255)
-                    //         sum+=rgba[k]
-
-                    //     }
-
-                        
-                    // }
+       
 
                     // Cancel transparency 
                     rgba[3]= ( rgba[3] < 0.2 )? .2:rgba[3]
@@ -120,12 +181,8 @@ function setPageBackgroundColor() {
                     }
                         let name = properties[j].name
 
-
-
                         element.style.removeProperty(name);
-                        // properties[j].element.style.backgroundColor = rgbatotext(newbackground)
-                        // console.log('%c---   '+ rgbatotext(newbackground), `color: yellow`)
-                        
+
                         element.style.setProperty(name, ""+rgbatotext(newbackground)+"", "important");
                 
 

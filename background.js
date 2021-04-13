@@ -18,7 +18,7 @@ chrome.runtime.onInstalled.addListener(() => {
 //     });
    
 //   });
-
+ 
    // The body of this function will be executed as a content script inside the
 //   // current page
 
