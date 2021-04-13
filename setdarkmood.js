@@ -1,75 +1,86 @@
-function updateifActive(){
-    chrome.storage.sync.get("active", ({ active }) => {
-        // changeColor.style.backgroundColor = color;
-        // changeColor.innerHTML=""+active
-        // console.log('hello ################################3')
-        console.log('this is the event')
-        console.log(event);
-        console.log(active)
-        if(active){setPageBackgroundColor()}
-    })
-}
-
-updateifActive()// first start up ....
-
-
-
-function nodeInsertedCallback(event) {
-    console.log(updateNow + '  updating ')
-    if(updateNow ){
-
-    // updateOnHold  = false
-    // console.log('updateOnHold is set to '+updateOnHold)
-    updateifActive()
-    }
-    else{ 
-        // updateOnHold  = true
-        console.log('No update yet')
-    };
-
-
-};
+let DomElem = 0;
+console.log('mutation');
 
 
 // this to stop updating at every DOM update as -addEventListener DOMNodeInserted- fires a lot in the begining
 let updateNow = false  
 time2wait = 3000 // the time start slow then it become faster to be more responsive
+repetition_counter=0;
+let restartcounter = true
+let repetitionAllowed = 255
+
+
+// holdrepititiveUpdate('first call')
+
+
+function updateifActive(){
+    chrome.storage.sync.get("active", ({ active }) => {
+
+
+        if(active){
+            setPageBackgroundColor()
+            document.addEventListener('DOMNodeInserted', holdrepititiveUpdate);
+        }
+
+    })
+}
+
+updateifActive()// first start up ....
+
+function nodeInsertedCallback(event) {
+    // console.log(updateNow + '  updating ')
+    if(true ){
+         updateifActive()
+    }
+    else{ 
+        console.log('No update yet')
+    };
+};
 
 // in case the updateNow was false and update happened this will store that to fire the update 
 // let updateOnHold  = true
+function holdrepititiveUpdate(event){
 
-setTimeout(() => {
-            updateNow = true 
-            nodeInsertedCallback(" * waiting if active ") 
-            // updateOnHold  = false
-            // console.log('updateOnHold is set to '+updateOnHold)
+        repetition_counter+=1
+        console.log('Repetition counter at ' , repetition_counter)
+        if(repetition_counter < repetitionAllowed )
+        {           
 
-                
+            nodeInsertedCallback(event) 
+            // console.log(repetition_counter)
 
-}, time2wait);
+            if(restartcounter)
+            {
+                restartcounter = false
+                setTimeout(() => {            
+                    repetition_counter = 0
+                    console.log('restarting counter '+ repetition_counter)
+                    restartcounter = true
+                    repetitionAllowed =5 
+                    console.log('%cStart Lisening',"color: green")
+                    document.addEventListener('DOMNodeInserted', holdrepititiveUpdate);
 
-// setInterval(()=>{
-    
-//     console.log('chnging updateNow to ',!updateNow)
-//     if(updateNow){
-//         if(updateOnHold){
-//             nodeInsertedCallback(" * waiting if active ") 
-//             updateOnHold  = false
-//             console.log('updateOnHold is set to '+updateOnHold)
-//          }
+                }, 2000);
+            }
+            
+        }
+        else
+        {
+            console.log('%cStop Lisening',"color: red")
+            document.removeEventListener('DOMNodeInserted',holdrepititiveUpdate)
+            console.log('too many updates')
+        }
+}
 
-//     }
-//     else{
-
-//     }
-//     updateNow = !updateNow
-// },time2wait)
-
-document.addEventListener('DOMNodeInserted', nodeInsertedCallback);
 
 
 function setPageBackgroundColor() {
 
+    let elem =   document.body.getElementsByTagName("*");
+
+    if(elem.length!== DomElem) // checking if the dom element has chaged to perform a change
+    {
+        DomElem= elem.length
     chrome.storage.sync.get("color", ({ color }) => {
 
     function rgbatotext(rgba_array){
@@ -116,7 +127,6 @@ function setPageBackgroundColor() {
 
 
 
-    let elem =   document.body.getElementsByTagName("*");
 
     checkChange(document.getElementsByTagName('body')[0])// this to check the body as the it was not included in the main wildselector
     for (var i = 0; i < elem.length; i++) { 
@@ -124,9 +134,9 @@ function setPageBackgroundColor() {
     }
 
 
-    console.log('number of element in the DOM '+ elem.length)
-    console.log('element number 7 in the DOM  '+ elem.length)
-    console.log(elem[6])
+    console.log('%cChanged detected number of element in the DOM '+ elem.length, "color:lightcoral")
+    // console.log('element number 7 in the DOM  '+ elem.length)
+    // console.log(elem[6])
 
     function checkChange(element)
     {
@@ -201,6 +211,10 @@ function setPageBackgroundColor() {
 
 });
 
+    } 
+    else{
+        console.log('%cNo change detected on the dom number of element :'  + elem.length, "color:lightblue")
+    }  
 }
 
 chrome.storage.sync.get("active", ({ active }) => {
