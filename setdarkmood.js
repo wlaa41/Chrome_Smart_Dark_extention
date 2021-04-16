@@ -109,44 +109,50 @@ function setPageBackgroundColor() {
                 };
 
             // the properties to be changed in the dom element
-            let properties = [{ name: "background-color", ratio: 2, camelCase: "backgroundColor"  , 
+
+            let properties = [ { name: "color", ratio: 1, camelCase: "color" , element: null, 
+                                          threshold:350,compare: operator_table.lessThan, missingValue_replace: "rgba(255,120,150,1)"},
+                                { name: "background-color", ratio: 2, camelCase: "backgroundColor"  , 
                                     element: null, threshold:450,compare: operator_table.moreThan, missingValue_replace: "rgb(130,120,150)"},
-                                { name: "color", ratio: 1, camelCase: "color" , element: null, 
-                                    threshold:350,compare: operator_table.lessThan, missingValue_replace: "rgba(255,120,150,1)"},
+                               
                                 { name: "border_color", ratio: 1, camelCase: "borderColor"  ,
                                     element: null, threshold:350,compare: operator_table.lessThan, missingValue_replace: "rgb(130,120,150)"} ,
                                 { name: "box-shadow", ratio: 1, camelCase: "boxShadow"  ,
                                     element: null, threshold:400,compare: operator_table.lessThan, missingValue_replace: "rgb(130,120,150)"} ]
 
-
-
-
-            checkChange(document.getElementsByTagName('body')[0])// this to check the body as the it was not included in the main wildselector
+            checkbody(properties[1]) // the prop[1] to apply changes on the background if the order above change change the number
+            // this to check the body as the it was not included in the main wildselector
             for (var i = 0; i < elem.length; i++) { 
-                checkChange(elem[i])
+                
+                let tag = elem[i].tagName.toLowerCase()
+                if(tag === 'script'|| tag === 'path'|| tag === 'meta'|| tag === 'img'|| tag === 'link'|| tag === 'svg'|| tag === 'use' )
+                {}else{
+                    checkChange(elem[i])
+                }
             }
-
-
             console.log('%cChanged detected number of element in the DOM '+ elem.length, "color:lightcoral")
-            // console.log('element number 7 in the DOM  '+ elem.length)
-            // console.log(elem[6])
 
             function checkChange(element)
             {
+
+                
+                let itsText = element.childNodes[0]?.nodeValue?true:false
+                // console.log(  ''+element.childNodes[0]?.nodeValue + ':  '      + itsText)
+                // console.log(  element)
+
+
                 for (let j = 0; j < properties.length; j++) {
 
-                    properties[j].element = window.getComputedStyle(element, null).getPropertyValue(properties[j].name);
-                
-
-                    // handling missing data
-                    var rgba = properties[j].element  ?properties[j].element: properties[j].missingValue_replace ; 
-                    if(element.classList.contains("udlite-badge-bestseller") ||
-                    rgba === "rga(255, 231, 153)"){
-
-                        console.log('catch it     #############################################3')
-                        console.log(element)
+                    let prop = window.getComputedStyle(element, null).getPropertyValue(properties[j].name);
+                    // let propDef = element?.style[properties[j].name];
+                    // let background = propDef?(element?.style['background']?true:false) : false;
+                    
+                    if(j > 0 ){
+                    if(!prop){continue}
+                    // if(!prop && element.tagName !=='BODY'){continue}
                     }
-                    // console.log(rgba,properties[j].name) 
+                    // handling missing data
+                    var rgba = prop  ?prop: properties[j].missingValue_replace ; 
                 
                     if(rgba !== undefined && rgba.length > 5) {
 
@@ -172,10 +178,10 @@ function setPageBackgroundColor() {
                         
                             const sum_bckgrnd= rgba[0]+rgba[1]+rgba[2] // calculate how bright the element is. the larger the number is the brighter it is
                             
-                            if (sum_bckgrnd === 639) { // this methon was used to catch amazon wrong transparency behavior
-                                console.log(rgbatotext(rgba) + "  639  "+  properties[j].name +"   "+ element)
-                                console.log('%c  sum   '+   sum_bckgrnd  +'   ##' ,`color: lightgreen`)
-                            }
+                            // if (sum_bckgrnd === 639) { // this methon was used to catch amazon wrong transparency behavior
+                            //     console.log(rgbatotext(rgba) + "  639  "+  properties[j].name +"   "+ element)
+                            //     console.log('%c  sum   '+   sum_bckgrnd  +'   ##' ,`color: lightgreen`)
+                            // }
 
                             threshold = properties[j].threshold  // the threshole where change in the color will happen
                             let newbackground = rgba
@@ -183,22 +189,46 @@ function setPageBackgroundColor() {
                                 let newbackground = flipColor(rgba, properties[j].ratio) // calculating the new color
                             }
                                 let name = properties[j].name
-
                                 element.style.removeProperty(name);
-
                                 element.style.setProperty(name, ""+rgbatotext(newbackground)+"", "important");
-                        
-
-                                
-                                if (sum_bckgrnd === 639)  { // this methon was used to catch amazon wrong transparency behavior
-                                    console.log(rgbatotext(newbackground) + "  "+  properties[j].name)
-                                    console.log('##########   after   ###############')
-                                }
-                        
                     }
-                        
                 }
-            }
+                }
+
+            function checkbody(defaultValue)
+                {
+                    let body = document.getElementsByTagName('body')[0]
+                        let prop = window.getComputedStyle(body, null).getPropertyValue(defaultValue.name);
+                        // handling missing data
+                        var rgba = prop ? prop: defaultValue.defaultValue; 
+                        if(rgba !== undefined && rgba.length > 5) {
+                                rgba = rgba.split('(')[1].split(')')[0]
+                                        .replace(/ /g, '')
+                                        .split(',');
+                                // convert to number
+                                rgba= rgba.map(Number) 
+                                if(rgba.length<4){
+                                    rgba = rgba.concat([1]) // changing rgb to rgba
+                                }
+                                // Cancel transparency 
+                                rgba[3]= ( rgba[3] < 0.2 )? 1:rgba[3]
+                                const sum_bckgrnd= rgba[0]+rgba[1]+rgba[2] // calculate how bright the element is. the larger the number is the brighter it is
+                                
+                                threshold = defaultValue.threshold  // the threshole where change in the color will happen
+                                let newbackground = rgba
+                                if (defaultValue.compare(sum_bckgrnd,threshold)) {   // Dynamic comparision as some properties must have dark and other bright change
+                                    let newbackground = flipColor(rgba, defaultValue.ratio) // calculating the new color
+                                }
+                                    let name = defaultValue.name
+                                    body.style.removeProperty(name);
+                                    body.style.setProperty(name, ""+rgbatotext(newbackground)+"", "important");
+                            
+                        }
+                            
+                }
+                    
+
+
                 });
 
     } 
