@@ -1,3 +1,9 @@
+
+
+
+
+
+
 let DomElem = 0;
 console.log('mutation');
 
@@ -15,40 +21,32 @@ let repetitionAllowed = 300
 
 function updateifActive(){
     chrome.storage.sync.get("active", ({ active }) => {
-
-
         if(active){
             setPageBackgroundColor()
-            document.addEventListener('DOMNodeInserted', holdrepititiveUpdate);
         }
-
     })
 }
 
-updateifActive()// first start up ....
+// updateifActive()// first start up ....
+chrome.storage.sync.get("active", ({ active }) => {
+    console.log('the extention is ',active?'ON':'OFF')
+    if(active)holdrepititiveUpdate(null);
+    else console.log('%cthe extn is off',"color: red");
+});
 
-function nodeInsertedCallback(event) {
-    // console.log(updateNow + '  updating ')
-    if(true ){
-         updateifActive()
-    }
-    else{ 
-        console.log('No update yet')
-    };
-};
+
 
 // in case the updateNow was false and update happened this will store that to fire the update 
 // let updateOnHold  = true
 function holdrepititiveUpdate(event){
 
         repetition_counter+=1
-        console.log('Repetition counter at ' , repetition_counter)
+        console.log('Repetition counter at ' , repetition_counter,'  repetitionAllowed at ' , repetitionAllowed)
         if(repetition_counter < repetitionAllowed )
         {           
 
-            nodeInsertedCallback(event) 
+            updateifActive()
             // console.log(repetition_counter)
-
             if(restartcounter)
             {
                 restartcounter = false
@@ -57,7 +55,16 @@ function holdrepititiveUpdate(event){
                     console.log('restarting counter '+ repetition_counter)
                     restartcounter = true
                     repetitionAllowed =5 
+                    
+                    console.log('%cStop Lisening',"color: red")
+                    console.log('%c^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^',"color: violet")
+                    document.removeEventListener('DOMNodeInserted',holdrepititiveUpdate)
+
+                    console.log('%c^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^',"color: violet")
                     console.log('%cStart Lisening',"color: green")
+                    // chrome.declarativeContent.onPageChanged.addListener(chromeActiononPageChanged)
+
+
                     document.addEventListener('DOMNodeInserted', holdrepititiveUpdate);
 
                 }, 2000);
@@ -67,6 +74,7 @@ function holdrepititiveUpdate(event){
         else
         {
             console.log('%cStop Lisening',"color: red")
+            console.log('%c^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^',"color: violet")
             document.removeEventListener('DOMNodeInserted',holdrepititiveUpdate)
             console.log('too many updates')
         }
@@ -74,16 +82,16 @@ function holdrepititiveUpdate(event){
 
 
 
-function setPageBackgroundColor() {
+function setPageBackgroundColor(FireAtFirstPress = false) {
 
     let elem =   document.body.getElementsByTagName("*");
 
 
-    if(elem.length!== DomElem) // checking if the dom element has chaged to perform a change
+    if(elem.length!== DomElem  || FireAtFirstPress) // checking if the dom element has chaged to perform a change
     {
-            DomElem= elem.length
-            chrome.storage.sync.get("color", ({ color }) => {
+            if(!FireAtFirstPress){ DomElem= elem.length}
 
+            
             function rgbatotext(rgba_array){
                 [r,g,b,a]=rgba_array
                 return "rgba("+r+","+g+","+b+","+a+ ")";
@@ -92,14 +100,12 @@ function setPageBackgroundColor() {
             // dark or bright this method flips the value with keeping the color degree
             function flipColor(rgba_arry,rate=2){
 
-                // if(rate==1){console.log(rate+" "+rgba_arry+ 'before %c#######'  , `color: ${rgbatotext(rgba_arry)}`);}
                 let min = Math.min(...rgba_arry.slice(0,3))
                 let max = Math.max(...rgba_arry.slice(0,3)) 
                 for (let i = 0; i < rgba_arry.length-1; i++) {
                     rgba_arry[i] = (255-max- min + parseFloat(rgba_arry[i]) ) * rate;
                 }
                 let after = rgba_arry
-                // if(rate==1){console.log(after + 'after %cback  #########' + min , `color: ${rgbatotext(after)}`)}
                 return after
             }
 
@@ -229,7 +235,7 @@ function setPageBackgroundColor() {
                     
 
 
-                });
+                
 
     } 
     else{
@@ -237,13 +243,11 @@ function setPageBackgroundColor() {
     }  
 }
 
-chrome.storage.sync.get("active", ({ active }) => {
-    // changeColor.style.backgroundColor = color;
-    // changeColor.innerHTML=""+active
-    // console.log('hello ################################3')
-    console.log(active)
-    if(active)setPageBackgroundColor();
 
-    // changeColor.style.color='white'
-  });
-// setPageBackgroundColor()
+
+
+// chromeActiononPageChanged()
+// {
+//     console.log('%cChrome action test ###########################################33',"color: yellowgreen")
+//     chrome.declarativeContent.onPageChanged.removeEventListener()
+// }
