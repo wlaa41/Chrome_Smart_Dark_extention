@@ -61,8 +61,9 @@ function holdrepititiveUpdate(event){
                     document.removeEventListener('DOMNodeInserted',holdrepititiveUpdate)
 
                     console.log('%c^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^',"color: violet")
+                  
                     console.log('%cStart Lisening',"color: green")
-                    // chrome.declarativeContent.onPageChanged.addListener(chromeActiononPageChanged)
+                    chrome.declarativeContent.onPageChanged.addListener(chromeActiononPageChanged)
 
 
                     document.addEventListener('DOMNodeInserted', holdrepititiveUpdate);
@@ -246,8 +247,8 @@ function setPageBackgroundColor(FireAtFirstPress = false) {
 
 
 
-// chromeActiononPageChanged()
-// {
-//     console.log('%cChrome action test ###########################################33',"color: yellowgreen")
-//     chrome.declarativeContent.onPageChanged.removeEventListener()
-// }
+chromeActiononPageChanged()
+{
+    console.log('%cChrome action test ###########################################33',"color: yellowgreen")
+    chrome.declarativeContent.removeEventListener('onPageChanged')
+}

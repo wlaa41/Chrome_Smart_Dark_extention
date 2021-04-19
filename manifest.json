@@ -6,7 +6,7 @@
     "background": {
         "service_worker": "background.js"
     },
-    "permissions": ["storage"],
+    "permissions": ["storage","declarativeContent"],
     "action": {
       "default_icon": {
         "16": "/images/get_started16.png",
@@ -18,7 +18,7 @@
     "content_scripts": [{
 
         "matches": ["<all_urls>"],
-        "js": ["contentScript.js", "setdarkmood.js"],
+        "js": ["contentScript.js", "resource.js"],
         "run_at":    "document_end"
 
       }],

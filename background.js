@@ -8,8 +8,15 @@ chrome.runtime.onInstalled.addListener(() => {
   console.log('Default background color set to %cghn kjh', `color: ${color}`);
 });
 
+// chrome.declarativeContent.onPageChanged.addListener((ran)=>
+// {
+//     console.log('*******************  page change from the background ************')
+// })
+
 
   chrome.action.onClicked.addListener(function (tab) {
+
+
     // console.log(active)
 
     chrome.storage.sync.get("active", ({ active }) => {
