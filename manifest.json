@@ -6,7 +6,11 @@
     "background": {
         "service_worker": "background.js"
     },
-    "permissions": ["storage","declarativeContent"],
+    "permissions": ["storage","declarativeContent",
+      "activeTab", "contentSettings","scripting"],
+      
+"host_permissions": [
+  "<all_urls>"],
     "action": {
       "default_icon": {
         "16": "/images/get_started16.png",
